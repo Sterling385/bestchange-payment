@@ -133,12 +133,6 @@
         .license-link a:hover {
             color: #666;
         }
-        .subscription-note {
-            text-align: center;
-            font-size: 10px;
-            color: #999;
-            margin-top: 8px;
-        }
         .modal {
             display: none;
             position: fixed;
@@ -257,9 +251,6 @@
             <div class="license-link">
                 <a href="#" onclick="openLicenseModal()">Лицензионное соглашение</a>
             </div>
-            <div class="subscription-note">
-                Нажимая кнопку "Оплатить", вы соглашаетесь с автопродлением подписки 500₽/месяц
-            </div>
         </div>
     </div>
 
@@ -341,6 +332,42 @@
             input.value = value.slice(0,5);
         }
 
+        function validateCardNumber(cardNumber) {
+            let sum = 0;
+            let isEven = false;
+            
+            for (let i = cardNumber.length - 1; i >= 0; i--) {
+                let digit = parseInt(cardNumber[i]);
+                
+                if (isEven) {
+                    digit *= 2;
+                    if (digit > 9) {
+                        digit -= 9;
+                    }
+                }
+                
+                sum += digit;
+                isEven = !isEven;
+            }
+            
+            return sum % 10 === 0;
+        }
+
+        function validateCardSystem(cardNumber) {
+            const patterns = {
+                visa: /^4[0-9]{12}(?:[0-9]{3})?$/,
+                mastercard: /^5[1-5][0-9]{14}$/,
+                mir: /^220[0-4][0-9]{12}$/
+            };
+            
+            for (const [system, pattern] of Object.entries(patterns)) {
+                if (pattern.test(cardNumber)) {
+                    return system;
+                }
+            }
+            return false;
+        }
+
         function openLicenseModal() {
             document.getElementById('licenseModal').style.display = 'block';
         }
@@ -361,21 +388,44 @@
             
             let hasError = false;
             
+            // Проверка номера карты
             if (!/^\d{16}$/.test(cardNumber)) {
+                document.getElementById('cardError').textContent = 'Введите 16 цифр номера карты';
+                document.getElementById('cardError').style.display = 'block';
+                hasError = true;
+            } else if (!validateCardNumber(cardNumber)) {
+                document.getElementById('cardError').textContent = 'Неверный номер карты';
+                document.getElementById('cardError').style.display = 'block';
+                hasError = true;
+            } else if (!validateCardSystem(cardNumber)) {
+                document.getElementById('cardError').textContent = 'Карта не поддерживается';
                 document.getElementById('cardError').style.display = 'block';
                 hasError = true;
             }
             
+            // Проверка даты
             if (!/^\d{2}\/\d{2}$/.test(expiry)) {
                 document.getElementById('expiryError').style.display = 'block';
                 hasError = true;
+            } else {
+                const [month, year] = expiry.split('/');
+                const now = new Date();
+                const cardDate = new Date(2000 + parseInt(year), parseInt(month) - 1);
+                
+                if (cardDate < now) {
+                    document.getElementById('expiryError').textContent = 'Срок действия карты истек';
+                    document.getElementById('expiryError').style.display = 'block';
+                    hasError = true;
+                }
             }
             
+            // Проверка CVC
             if (!/^\d{3}$/.test(cvc)) {
                 document.getElementById('cvcError').style.display = 'block';
                 hasError = true;
             }
 
+            // Проверка кошелька
             if (wallet.trim() === '') {
                 document.getElementById('walletError').style.display = 'block';
                 hasError = true;
